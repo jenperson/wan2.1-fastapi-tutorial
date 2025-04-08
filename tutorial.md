@@ -14,7 +14,7 @@ In this tutorial, we explore usage of Wan2.1, a comprehensive and open suite of 
 
 To get the code for the video generation server, you can clone [this repo](https://github.com/jenperson/wan2.1-fastapi). You don't need to download the code directly unless you want to reference it, as you have the option to deploy directly from the repo using the "Deploy to Koyeb" button: [![Deploy to Koyeb](https://www.koyeb.com/static/images/deploy/button.svg)](https://app.koyeb.com/deploy?name=wan2-1-fastapi&repository=jenperson%2Fwan2.1-fastapi&branch=main&builder=dockerfile&instance_type=gpu-nvidia-a100&regions=na&env%5BHF_HUB_ENABLE_HF_TRANSFER%5D=1)
 
-To get the code for the frontend application, clone [this repo](https://github.com/jenperson/wan2.1-fastapi-frontend). You can run this app locally, or you have the option to deploy to Koyeb.
+To get the code for the frontend application, clone [this repo](https://github.com/jenperson/wan2.1-fastapi-frontend). You can run this app locally, or you have the option to deploy to Koyeb: [![Deploy to Koyeb](https://www.koyeb.com/static/images/deploy/button.svg)](https://app.koyeb.com/deploy?name=wan2-1-fastapi-frontend&repository=jenperson%2Fwan2.1-fastapi-frontend&branch=main&run_command=npm+run+serve&instance_type=medium&regions=was)
 
 ## Viewing the video generation code
 
