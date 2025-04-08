@@ -179,10 +179,10 @@ WORKDIR /app
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-   python3-pip \
-   git \
-   git-lfs && \
-   rm -rf /var/lib/apt/lists/*
+    python3-pip \
+    git \
+    git-lfs && \
+    rm -rf /var/lib/apt/lists/*
 
 # Copy and install Python dependencies
 COPY requirements.txt .
@@ -191,19 +191,44 @@ RUN pip install --no-cache-dir -r requirements.txt
 # This is only working from a separate install right now
 RUN pip install git+https://github.com/huggingface/diffusers
 
-# Copy the model in chunks
-COPY model/model_index.json /app/model/
-COPY model/image_encoder /app/model/image_encoder/
-COPY model/image_processor /app/model/image_processor/
-COPY model/scheduler /app/model/scheduler/
-COPY model/text_encoder /app/model/text_encoder/
-COPY model/tokenizer /app/model/tokenizer/
-COPY model/transformer /app/model/transformer/
-COPY model/vae /app/model/vae/
+# Create model directory
+RUN mkdir -p /app/model
 
-
-# Ensure the model is detected properly in diffusers
-ENV HUGGINGFACE_HUB_CACHE="/app/model"
+# Download model in chunks to leverage Docker layer caching
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', allow_patterns=['model_index.json'])"
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', allow_patterns=['image_encoder/config.json'])"
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', allow_patterns=['image_encoder/model.safetensors'])"
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', allow_patterns=['image_processor/preprocessor_config.json'])"
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', allow_patterns=['scheduler/scheduler_config.json'])"
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', allow_patterns=['text_encoder/config.json'])"
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', allow_patterns=['text_encoder/model-00001-of-00005.safetensors'])"
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', allow_patterns=['text_encoder/model-00002-of-00005.safetensors'])"
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', allow_patterns=['text_encoder/model-00003-of-00005.safetensors'])"
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', allow_patterns=['text_encoder/model-00004-of-00005.safetensors'])"
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', allow_patterns=['text_encoder/model-00005-of-00005.safetensors'])"
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', allow_patterns=['text_encoder/model.safetensors.index.json'])"
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', allow_patterns=['tokenizer/special_tokens_map.json'])"
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', allow_patterns=['tokenizer/spiece.model'])"
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', allow_patterns=['tokenizer/tokenizer.json'])"
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', allow_patterns=['tokenizer/tokenizer_config.json'])"
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', allow_patterns=['transformer/config.json'])"
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', allow_patterns=['transformer/diffusion_pytorch_model-00001-of-00014.safetensors'])"
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', allow_patterns=['transformer/diffusion_pytorch_model-00002-of-00014.safetensors'])"
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', allow_patterns=['transformer/diffusion_pytorch_model-00003-of-00014.safetensors'])"
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', allow_patterns=['transformer/diffusion_pytorch_model-00004-of-00014.safetensors'])"
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', allow_patterns=['transformer/diffusion_pytorch_model-00005-of-00014.safetensors'])"
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', allow_patterns=['transformer/diffusion_pytorch_model-00006-of-00014.safetensors'])"
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', allow_patterns=['transformer/diffusion_pytorch_model-00007-of-00014.safetensors'])"
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', allow_patterns=['transformer/diffusion_pytorch_model-00008-of-00014.safetensors'])"
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', allow_patterns=['transformer/diffusion_pytorch_model-00009-of-00014.safetensors'])"
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', allow_patterns=['transformer/diffusion_pytorch_model-00010-of-00014.safetensors'])"
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', allow_patterns=['transformer/diffusion_pytorch_model-00011-of-00014.safetensors'])"
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', allow_patterns=['transformer/diffusion_pytorch_model-00012-of-00014.safetensors'])"
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', allow_patterns=['transformer/diffusion_pytorch_model-00013-of-00014.safetensors'])"
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', allow_patterns=['transformer/diffusion_pytorch_model-00014-of-00014.safetensors'])"
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', allow_patterns=['transformer/diffusion_pytorch_model.safetensors.index.json'])"
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', allow_patterns=['vae/config.json'])"
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', allow_patterns=['vae/diffusion_pytorch_model.safetensors'])"
 
 # Copy the API code
 COPY . .
@@ -219,7 +244,7 @@ CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 Notice the multiple operations in the following format:
 
 ```
-RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', allow_patterns=['model_index.json'])"
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', allow_patterns=['vae/diffusion_pytorch_model.safetensors'])"
 ```
 
 In order to speed up download of the model, we download it in chunks. This leads to faster builds, which is especially important as you scale. You can abstract this functionality for easy reuse, but it is shown here for demonstration purposes.
