@@ -12,9 +12,9 @@ In this tutorial, we explore usage of Wan2.1, a comprehensive and open suite of 
 
 ## Getting the code
 
-To get the code for the video generation server, you can clone this repo. You don't need to download the code directly unless you want to reference it, as you have the option to deploy directly from the repo using the "Deploy to Koyeb" button.
+To get the code for the video generation server, you can clone [this repo](https://github.com/jenperson/wan2.1-fastapi). You don't need to download the code directly unless you want to reference it, as you have the option to deploy directly from the repo using the "Deploy to Koyeb" button: [![Deploy to Koyeb](https://www.koyeb.com/static/images/deploy/button.svg)](https://app.koyeb.com/deploy?name=wan2-1-fastapi&repository=jenperson%2Fwan2.1-fastapi&branch=main&builder=dockerfile&instance_type=gpu-nvidia-a100&regions=na&env%5BHF_HUB_ENABLE_HF_TRANSFER%5D=1)
 
-To get the code for the frontend application, clone this repo. You can run this app locally, or you have the option to deploy to Koyeb.
+To get the code for the frontend application, clone [this repo](https://github.com/jenperson/wan2.1-fastapi-frontend). You can run this app locally, or you have the option to deploy to Koyeb.
 
 ## Viewing the video generation code
 
@@ -83,6 +83,7 @@ pipe.to("cuda")
 print("Model loaded!")
 ```
 Next, define the API request schema:
+
 ```
 # Define the request schema
 class GenerationRequest(BaseModel):
@@ -93,8 +94,8 @@ class GenerationRequest(BaseModel):
 ```
 
 
-
 Use a function called `run_video_job` to kick off the video generation process:
+
 ```python
 def run_video_job(job_id: str, request: GenerationRequest):
    try:
@@ -151,6 +152,7 @@ def generate_video(request: GenerationRequest, background_tasks: BackgroundTasks
 ```
 
 Declare another endpoint called `status` that is used to poll the task and determine if it has completed:
+
 ```python
 @app.get("/status/{job_id}")
 def get_status(job_id: str):
@@ -162,20 +164,18 @@ def get_status(job_id: str):
    else:
        return {"status": "processing"}
 ```
+
 ### Creating the Docker container
 
 To easily build and scale your applications, Koyeb uses container orchestration through Docker.
 
 The following code comprises the Dockerfile for the diffuser server:
 
-
 ```dockerfile
 FROM pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
 
-
 # Set working directory
 WORKDIR /app
-
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -184,15 +184,12 @@ RUN apt-get update && apt-get install -y \
    git-lfs && \
    rm -rf /var/lib/apt/lists/*
 
-
 # Copy and install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-
 # This is only working from a separate install right now
 RUN pip install git+https://github.com/huggingface/diffusers
-
 
 # Copy the model in chunks
 COPY model/model_index.json /app/model/
@@ -208,14 +205,11 @@ COPY model/vae /app/model/vae/
 # Ensure the model is detected properly in diffusers
 ENV HUGGINGFACE_HUB_CACHE="/app/model"
 
-
 # Copy the API code
 COPY . .
 
-
 # Expose FastAPI port
 EXPOSE 8000
-
 
 # Start FastAPI
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
@@ -227,9 +221,11 @@ Notice the multiple operations in the following format:
 ```
 RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', allow_patterns=['model_index.json'])"
 ```
+
 In order to speed up download of the model, we download it in chunks. This leads to faster builds, which is especially important as you scale. You can abstract this functionality for easy reuse, but it is shown here for demonstration purposes.
 
 ## Viewing the frontend code
+
 The important functionality of the React frontend can be found in `App.tsx`. The `handleGenerate()` function calls to the FastAPI:
 
 ```tsx
@@ -307,42 +303,36 @@ The important functionality of the React frontend can be found in `App.tsx`. The
  };
 
 ```
+
 ## Deploying to Koyeb
 
-To deploy the application to Koyeb, there are two main components: the Python application to be deployed on GPU, and the web application to be deployed on CPU. If you opted to download the code, you can deploy these by  selecting your repos from GitHub. Alternatively, you can use the "Deploy to Koyeb" button available in the READMEs of the frontend and backend applications.
+To deploy the application to Koyeb, there are two main components: the Python application to be deployed on GPU, and the web application to be deployed on CPU. If you opted to download the code, you can deploy these by  selecting your repos from GitHub. Alternatively, you can use the "Deploy to Koyeb" button as previously shown.
 
 ## Setting up the frontend
 
-To run the demo, you can deploy the frontend or run it locally on your machine.
+To run the demo, you can deploy the frontend or run it locally on your machine. You can find both options in the following steps.
 
 ### Running the frontend locally
 
 1. Create a .env file at the root of the project.
 
-
 2. Add your Koyeb web URL to the .env file:
-
 
 ```
 VITE_API_BASE_URL=https://YOUR-PROJECT-ID.koyeb.app
 ```
 
-
 3. Install required dependencies:
-
 
 ```
 npm install
 ```
 
-
 4. Start the app:
-
 
 ```
 npm run dev
 ```
-
 
 The app is now running locally at `http://localhost:5173/`
 
